@@ -1,0 +1,100 @@
+// src/components/WeatherCard.jsx
+import { useContext } from 'react';
+import { WeatherContext } from '../context/WeatherContext';
+import Loading from './Loading';
+import ErrorDisplay from './ErrorDisplay';
+import { ThemeContext } from '../context/ThemeContext';
+
+
+const WeatherCard = () => {
+  const { weather, loading, error } = useContext(WeatherContext);
+  const { darkMode } = useContext(ThemeContext);
+
+  if (loading) return <Loading />;
+  if (error) return <ErrorDisplay message={error} />;
+  if (!weather) return null;
+
+  // Formater les données
+  const temp = Math.round(weather.main.temp);
+  const feelsLike = Math.round(weather.main.feels_like);
+  const windSpeed = (weather.wind.speed * 3.6).toFixed(1); // Conversion m/s en km/h
+  const sunrise = new Date(weather.sys.sunrise * 1000).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  const sunset = new Date(weather.sys.sunset * 1000).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  // Récupérer l'icône météo
+  const iconUrl = `https://openweathermap.org/img/wn/${weather.weather[0].icon}@4x.png`;
+
+  return (
+    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transition-all duration-300 transform hover:shadow-xl`}>
+      <div className="p-6">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="text-center md:text-left mb-4 md:mb-0">
+            <h2 className={` ${darkMode ? 'text-white' : 'text-gray-800'} text-3xl font-bold`}>
+              {weather.name}, {weather.sys.country}
+            </h2>
+            <p className={` ${darkMode ? 'text-gray-300' : 'text-gray-600'} mt-1`}>
+              {new Date().toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })}
+            </p>
+            <p className={`
+              ${darkMode ? 'text-gray-200' : 'text-gray-700'}
+              text-lg mt-2 capitalize`}>
+              {weather.weather[0].description}
+            </p>
+          </div>
+
+          <div className="flex items-center">
+            <img
+              src={iconUrl}
+              alt={weather.weather[0].description}
+              className="w-24 h-24"
+            />
+            <div className="text-center">
+              <div className={`text-5xl font-bold text-gray-900 dark:text-white`}>
+                {temp}°C
+              </div>
+              <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
+                Ressenti: {feelsLike}°C
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className={`${darkMode ? 'text-blue-900/30' : 'bg-blue-50'} p-3 rounded-lg`}>
+            <div className={`${darkMode ? 'text-blue-300' : 'text-blue-600'} font-medium`}>Humidité</div>
+            <div className={`${darkMode ? 'text-white' : 'text-gray-800'} text-2xl`}>{weather.main.humidity}%</div>
+          </div>
+
+          <div className={`${darkMode ? 'bg-green-900/30' : 'bg-green-50'} p-3 rounded-lg`}>
+            <div className={`${darkMode ? 'text-green-300' : 'text-green-600'} font-medium`}>Vent</div>
+            <div className={`${darkMode ? 'text-white' : 'text-gray-800'} text-2xl`}>{windSpeed} km/h</div>
+          </div>
+
+          <div className={`${darkMode ? 'bg-yellow-900/30' : 'bg-yellow-50'} p-3 rounded-lg`}>
+            <div className={`${darkMode ? 'text-yellow-300' : 'text-yellow-600'} font-medium`}>Lever</div>
+            <div className={`${darkMode ? 'text-white' : 'text-gray-800'} text-2xl`}>{sunrise}</div>
+          </div>
+
+          <div className={`${darkMode ? 'bg-orange-900/30' : 'bg-orange-50'} p-3 rounded-lg`}>
+            <div className={`${darkMode ? 'text-orange-300' : 'text-orange-600'} font-medium`}>Coucher</div>
+            <div className={`${darkMode ? 'text-white' : 'text-gray-800'} text-2xl`}>{sunset}</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default WeatherCard;
